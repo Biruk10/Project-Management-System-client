@@ -99,45 +99,38 @@ export class ProjectDetailComponent implements OnInit {
     }));
   });
 
-  // ── Update project form ───────────────────────────────────────────────────
   showUpdateForm  = signal(false);
   updateSubmit    = signal(false);
   updateError     = signal<string | null>(null);
   updateSuccess   = signal<string | null>(null);
   updateForm: UpdateProjectForm = this.emptyUpdateForm();
 
-  // ── Cancel project confirm ────────────────────────────────────────────────
   showCancelConfirm = signal(false);
   cancelSubmit      = signal(false);
   cancelError       = signal<string | null>(null);
 
-  // ── Delete project confirm ────────────────────────────────────────────────
   showDeleteConfirm = signal(false);
   deleteSubmit      = signal(false);
   deleteError       = signal<string | null>(null);
 
-  // ── Add budget form ───────────────────────────────────────────────────────
   showAddBudget   = signal(false);
   budgetSubmit    = signal(false);
   budgetError     = signal<string | null>(null);
   budgetSuccess   = signal<string | null>(null);
   budgetForm: AddBudgetForm = { totalAmount: null, category: 'General' };
 
-  // ── Record expense form ───────────────────────────────────────────────────
   showExpenseForm  = signal(false);
   expenseSubmit    = signal(false);
   expenseError     = signal<string | null>(null);
   expenseSuccess   = signal<string | null>(null);
   expenseForm: RecordExpenseForm = this.emptyExpenseForm();
 
-  // ── Update progress form (Project Manager) ─────────────────────────────────
   showProgressForm  = signal(false);
   progressSubmit    = signal(false);
   progressError     = signal<string | null>(null);
   progressSuccess   = signal<string | null>(null);
   progressForm = { status: 1, completion: 0 };
 
-  // ── Budget Requests (PM & OrgAdmin) ───────────────────────────────────────
   budgetRequests      = signal<BudgetRequest[]>([]);
   showRequestModal    = signal(false);
   requestSubmit       = signal(false);
@@ -145,21 +138,18 @@ export class ProjectDetailComponent implements OnInit {
   requestSuccess      = signal<string | null>(null);
   requestForm: BudgetRequestForm = this.emptyBudgetRequestForm();
 
-  // Review Budget Request Modal (OrgAdmin)
   showReviewModal     = signal(false);
   reviewSubmit        = signal(false);
   reviewError         = signal<string | null>(null);
   reviewForm: ReviewBudgetRequestForm = { requestId: 0, approve: true, comment: '' };
   reviewTarget        = signal<BudgetRequest | null>(null);
 
-  // ── Add Member Form (PM & OrgAdmin) ───────────────────────────────────────
   showAddMemberModal  = signal(false);
   addMemberSubmit     = signal(false);
   addMemberError      = signal<string | null>(null);
   addMemberSuccess    = signal<string | null>(null);
   addMemberForm: AddMemberForm = this.emptyAddMemberForm();
 
-  // Category history modal or expanded category view
   selectedCategory    = signal<BudgetLine | null>(null);
   showCategoryHistory = signal(false);
   categoryExpenses    = signal<Expense[]>([]);
@@ -275,7 +265,6 @@ export class ProjectDetailComponent implements OnInit {
     this.showCategoryHistory.set(false);
   }
 
-  // ── Update project ────────────────────────────────────────────────────────
   openUpdateForm(): void {
     const p = this.project();
     if (!p) return;
@@ -341,7 +330,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Cancel project ────────────────────────────────────────────────────────
   openCancelConfirm(): void {
     this.cancelError.set(null);
     this.showCancelConfirm.set(true);
@@ -378,7 +366,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Delete project ────────────────────────────────────────────────────────
   openDeleteConfirm(): void {
     this.deleteError.set(null);
     this.showDeleteConfirm.set(true);
@@ -405,7 +392,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Add budget form ───────────────────────────────────────────────────────
   openAddBudgetForm(): void {
     this.budgetForm = { totalAmount: null, category: 'General' };
     this.budgetError.set(null);
@@ -468,7 +454,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Record expense ────────────────────────────────────────────────────────
   openExpenseForm(): void {
     this.expenseForm = this.emptyExpenseForm();
     const b = this.primaryBudget();
@@ -529,7 +514,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Update progress (Project Manager) ──────────────────────────────────────
   openProgressForm(): void {
     const p = this.project();
     if (!p) return;
@@ -575,7 +559,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Budget Request Flow (PM & OrgAdmin) ──────────────────────────────────
   openBudgetRequestModal(category?: string, lineId?: number): void {
     const p = this.project();
     const primary = this.primaryBudget();
@@ -660,7 +643,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Review Budget Request (Org Admin) ─────────────────────────────────────
   openReviewModal(req: BudgetRequest, approve: boolean): void {
     this.reviewTarget.set(req);
     this.reviewForm = {
@@ -698,7 +680,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Team Members (PM & OrgAdmin) ──────────────────────────────────────────
   openAddMemberModal(): void {
     this.addMemberForm = this.emptyAddMemberForm();
     this.addMemberError.set(null);
@@ -766,7 +747,6 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   isCancelled(): boolean {
     const p = this.project();
     if (!p) return false;

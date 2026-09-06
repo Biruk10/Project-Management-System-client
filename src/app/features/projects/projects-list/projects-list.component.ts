@@ -44,26 +44,22 @@ export class ProjectsListComponent implements OnInit {
   search  = '';
   statusFilter = '';
 
-  // New project modal
   showModal  = signal(false);
   submitting = signal(false);
   formError  = signal<string | null>(null);
   users      = signal<User[]>([]);
   form: NewProjectForm = this.emptyForm();
 
-  // Edit project modal
   showEditModal  = signal(false);
   editSubmitting = signal(false);
   editError      = signal<string | null>(null);
   editForm: EditProjectForm = this.emptyEditForm();
 
-  // Cancel project confirm modal
   showCancelModal  = signal(false);
   cancellingProject = signal<Project | null>(null);
   cancelSubmitting = signal(false);
   cancelError      = signal<string | null>(null);
 
-  // Delete project confirm modal
   showDeleteModal  = signal(false);
   deletingProject  = signal<Project | null>(null);
   deleteSubmitting = signal(false);
@@ -127,7 +123,6 @@ export class ProjectsListComponent implements OnInit {
   onSearch(): void  { this.page = 1; this.load(); }
   changePage(p: number): void { this.page = p; this.load(); }
 
-  // ── New Project Modal ─────────────────────────────────────────────────────
 
   openModal(): void {
     this.form = this.emptyForm();
@@ -176,7 +171,6 @@ export class ProjectsListComponent implements OnInit {
     });
   }
 
-  // ── Edit Project Modal ────────────────────────────────────────────────────
 
   openEdit(p: Project): void {
     if (this.users().length === 0) this.loadUsers();
@@ -235,7 +229,6 @@ export class ProjectsListComponent implements OnInit {
     });
   }
 
-  // ── Cancel Project Confirmation ───────────────────────────────────────────
 
   openCancel(p: Project): void {
     this.cancellingProject.set(p);
@@ -274,7 +267,6 @@ export class ProjectsListComponent implements OnInit {
     });
   }
 
-  // ── Delete Project Confirmation ───────────────────────────────────────────
 
   openDelete(p: Project): void {
     this.deletingProject.set(p);
@@ -305,7 +297,6 @@ export class ProjectsListComponent implements OnInit {
     });
   }
 
-  // ── helpers ───────────────────────────────────────────────────────────────
 
   isCancelled(p: Project): boolean {
     return String(p.status) === '4' || p.status === 'Cancelled';

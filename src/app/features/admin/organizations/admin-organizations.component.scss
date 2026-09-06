@@ -72,7 +72,6 @@
 
 .empty-cell { text-align: center; padding: 40px; color: t.$text-muted; font-size: 13px; }
 
-// ── Compact Modal ────────────────────────────────────────────────────────────
 
 .modal-backdrop {
   position: fixed; inset: 0;
@@ -106,7 +105,6 @@
   overflow: hidden;
 }
 
-// Header
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 20px 16px;
@@ -136,7 +134,6 @@
   &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
-// Alerts
 .modal-alert {
   display: flex; align-items: center; gap: 8px;
   margin: 12px 20px 0;
@@ -149,7 +146,6 @@
   &.success { background: #f0fdf4; color: #15803d; border-color: t.$green; }
 }
 
-// Body
 .modal-body {
   padding: 16px 20px;
   overflow-y: auto;
@@ -160,7 +156,6 @@
   &::-webkit-scrollbar-thumb { background: t.$border; border-radius: 4px; }
 }
 
-// Section labels
 .section-label {
   display: flex; align-items: center; gap: 6px;
   font-size: 10.5px; font-weight: 700; text-transform: uppercase;
@@ -173,7 +168,6 @@
   height: 1px; background: t.$border; margin: 4px 0;
 }
 
-// Field layout
 .row-2 {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
 }
@@ -207,7 +201,6 @@
   select { cursor: pointer; }
 }
 
-// Footer
 .modal-footer {
   display: flex; justify-content: flex-end; align-items: center; gap: 8px;
   padding: 13px 20px 16px;

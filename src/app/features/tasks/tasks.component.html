@@ -65,7 +65,7 @@
               <td [class.overdue]="isOverdue(task)">
                 {{ task.dueDate ? (task.dueDate | date:'mediumDate') : '—' }}
               </td>
-              <!-- Progress column with inline update button -->
+              
               <td>
                 <div class="progress-cell">
                   <div class="mini-progress-wrap">
@@ -98,12 +98,12 @@
   }
 </div>
 
-<!-- ── Update Progress Modal ── -->
+
 @if (showProgress()) {
   <div class="tp-backdrop" (click)="closeProgress()">
     <div class="tp-modal" (click)="$event.stopPropagation()">
 
-      <!-- Header -->
+      
       <div class="tp-header">
         <div class="tp-header-left">
           <div class="tp-icon">
@@ -124,7 +124,7 @@
         </button>
       </div>
 
-      <!-- Alerts -->
+      
       @if (progError()) {
         <div class="tp-alert error">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -144,10 +144,10 @@
         </div>
       }
 
-      <!-- Body -->
+      
       <div class="tp-body">
 
-        <!-- Status -->
+        
         <div class="tp-field">
           <label>Status</label>
           <div class="status-pills">
@@ -164,7 +164,7 @@
           </div>
         </div>
 
-        <!-- Progress percentage -->
+        
         <div class="tp-field">
           <label>Completion — <strong>{{ progForm.completionPercentage }}%</strong></label>
           <input type="range" class="progress-slider"
@@ -176,7 +176,7 @@
           </div>
         </div>
 
-        <!-- Visual preview bar -->
+        
         <div class="preview-bar-wrap">
           <div class="preview-bar-track">
             <div class="preview-bar-fill" [style.width.%]="progForm.completionPercentage"></div>
@@ -185,7 +185,7 @@
 
       </div>
 
-      <!-- Footer -->
+      
       <div class="tp-footer">
         <button class="tp-cancel" (click)="closeProgress()" [disabled]="progSubmitting()">Cancel</button>
         <button class="tp-submit" (click)="submitProgress()" [disabled]="progSubmitting()">

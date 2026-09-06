@@ -88,12 +88,12 @@
   }
 </div>
 
-<!-- ── Register Organization Modal ── -->
+
 @if (showModal()) {
   <div class="modal-backdrop" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
 
-      <!-- Header -->
+      
       <div class="modal-header">
         <div class="modal-header-left">
           <div class="modal-icon">
@@ -114,7 +114,7 @@
         </button>
       </div>
 
-      <!-- Alerts -->
+      
       @if (formError()) {
         <div class="modal-alert error">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -132,10 +132,10 @@
         </div>
       }
 
-      <!-- Body -->
+      
       <div class="modal-body">
 
-        <!-- Section: Organization -->
+        
         <p class="section-label">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
@@ -180,10 +180,10 @@
           <input [(ngModel)]="form.address" placeholder="Bole Addis Ababa, Ethiopia" [disabled]="submitting()" />
         </div>
 
-        <!-- Divider -->
+        
         <div class="section-divider"></div>
 
-        <!-- Section: Admin -->
+        
         <p class="section-label">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -215,7 +215,7 @@
 
       </div>
 
-      <!-- Footer -->
+      
       <div class="modal-footer">
         <button class="btn-cancel" (click)="closeModal()" [disabled]="submitting()">Cancel</button>
         <button class="btn-submit" (click)="submitRegister()" [disabled]="submitting()">

@@ -36,21 +36,18 @@ interface AssignTaskForm {
 })
 export class UsersComponent implements OnInit {
 
-  // ── list ──────────────────────────────────────────────────────────────────
   result       = signal<PagedResult<User> | null>(null);
   loading      = signal(true);
   page         = 1;
   search       = '';
   activeFilter = '';
 
-  // ── new-user modal ────────────────────────────────────────────────────────
   showNewUser  = signal(false);
   submitting   = signal(false);
   formError    = signal<string | null>(null);
   roles        = signal<RoleOption[]>([]);
   newUserForm: NewUserForm = this.emptyNewUserForm();
 
-  // ── assign-task modal ─────────────────────────────────────────────────────
   showAssignTask  = signal(false);
   taskSubmitting  = signal(false);
   taskError       = signal<string | null>(null);
@@ -79,7 +76,6 @@ export class UsersComponent implements OnInit {
     this.loadProjects();
   }
 
-  // ── list helpers ──────────────────────────────────────────────────────────
   load(): void {
     this.loading.set(true);
     this.userService.getAll({
@@ -112,7 +108,6 @@ export class UsersComponent implements OnInit {
     action.subscribe({ next: () => this.load() });
   }
 
-  // ── new-user modal ────────────────────────────────────────────────────────
   openNewUser(): void {
     this.newUserForm = this.emptyNewUserForm();
     this.formError.set(null);
@@ -154,7 +149,6 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  // ── assign-task modal ─────────────────────────────────────────────────────
   openAssignTask(user: User): void {
     this.selectedUser.set(user);
     this.taskForm = this.emptyTaskForm();
@@ -199,7 +193,6 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  // ── status label ──────────────────────────────────────────────────────────
   statusLabel(status: number | string): string {
     const map: Record<string, string> = {
       '1': 'Active', '2': 'Inactive', '3': 'Pending', '4': 'Suspended',
@@ -208,7 +201,6 @@ export class UsersComponent implements OnInit {
     return map[String(status)] ?? String(status);
   }
 
-  // ── private helpers ───────────────────────────────────────────────────────
   private emptyNewUserForm(): NewUserForm {
     return { firstName: '', lastName: '', email: '', password: '', roleId: null };
   }

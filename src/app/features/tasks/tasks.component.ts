@@ -20,7 +20,6 @@ interface ProgressForm {
 })
 export class TasksComponent implements OnInit {
 
-  // ── list state ────────────────────────────────────────────────────────────
   result         = signal<PagedResult<Task> | null>(null);
   loading        = signal(true);
   page           = 1;
@@ -28,7 +27,6 @@ export class TasksComponent implements OnInit {
   statusFilter   = '';
   priorityFilter = '';
 
-  // ── update-progress modal ─────────────────────────────────────────────────
   showProgress   = signal(false);
   progSubmitting = signal(false);
   progError      = signal<string | null>(null);
@@ -46,7 +44,6 @@ export class TasksComponent implements OnInit {
   private authService = inject(AuthService);
   private taskService = inject(TaskService);
 
-  // ── computed flags ────────────────────────────────────────────────────────
   private get currentUserId(): number | undefined {
     return this.authService.currentUser()?.id;
   }
@@ -67,10 +64,8 @@ export class TasksComponent implements OnInit {
     return task.assignedToUserId === this.currentUserId;
   }
 
-  // ── lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void { this.load(); }
 
-  // ── list ──────────────────────────────────────────────────────────────────
   load(): void {
     this.loading.set(true);
     this.taskService.getAll({
@@ -88,7 +83,6 @@ export class TasksComponent implements OnInit {
   onSearch(): void { this.page = 1; this.load(); }
   changePage(p: number): void { this.page = p; this.load(); }
 
-  // ── update-progress modal ─────────────────────────────────────────────────
   openProgress(task: Task): void {
     this.selectedTask.set(task);
     this.progForm = {
@@ -116,7 +110,6 @@ export class TasksComponent implements OnInit {
 
     this.progSubmitting.set(true);
 
-    // Send all existing fields back — only status and completionPercentage change
     this.taskService.update(task.id, {
       title:                task.title,
       description:          task.description,
@@ -127,7 +120,6 @@ export class TasksComponent implements OnInit {
       completionPercentage: pct
     }).subscribe({
       next: updated => {
-        // Patch the task in place so the list refreshes without a full reload
         this.result.update(r => {
           if (!r) return r;
           return {
@@ -146,7 +138,6 @@ export class TasksComponent implements OnInit {
     });
   }
 
-  // ── display helpers ───────────────────────────────────────────────────────
   priorityLabel(p: string | number): string {
     const map: Record<string, string> = {
       '1': 'Low', '2': 'Medium', '3': 'High', '4': 'Urgent',

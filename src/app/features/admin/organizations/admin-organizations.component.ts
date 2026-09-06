@@ -30,7 +30,6 @@ export class AdminOrganizationsComponent implements OnInit {
   search = '';
   statusFilter = '';
 
-  // Registration modal
   showModal   = signal(false);
   submitting  = signal(false);
   formError   = signal<string | null>(null);

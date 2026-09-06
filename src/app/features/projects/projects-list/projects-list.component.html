@@ -127,12 +127,12 @@
   }
 </div>
 
-<!-- ── New Project Modal ── -->
+
 @if (showModal()) {
   <div class="np-backdrop" (click)="closeModal()">
     <div class="np-modal" (click)="$event.stopPropagation()">
 
-      <!-- Header -->
+      
       <div class="np-header">
         <div class="np-header-left">
           <div class="np-icon">
@@ -161,7 +161,7 @@
         </div>
       }
 
-      <!-- Body -->
+      
       <div class="np-body">
 
         <div class="np-field">
@@ -209,7 +209,7 @@
 
       </div>
 
-      <!-- Footer -->
+      
       <div class="np-footer">
         <button class="np-cancel" (click)="closeModal()" [disabled]="submitting()">Cancel</button>
         <button class="np-submit" (click)="submitCreate()" [disabled]="submitting()">
@@ -228,12 +228,12 @@
   </div>
 }
 
-<!-- ── Edit Project Modal ── -->
+
 @if (showEditModal()) {
   <div class="np-backdrop" (click)="closeEditModal()">
     <div class="np-modal" (click)="$event.stopPropagation()">
 
-      <!-- Header -->
+      
       <div class="np-header">
         <div class="np-header-left">
           <div class="np-icon">✏️</div>
@@ -254,7 +254,7 @@
         </div>
       }
 
-      <!-- Body -->
+      
       <div class="np-body">
 
         <div class="np-field">
@@ -306,7 +306,7 @@
 
       </div>
 
-      <!-- Footer -->
+      
       <div class="np-footer">
         <button class="np-cancel" (click)="closeEditModal()" [disabled]="editSubmitting()">Cancel</button>
         <button class="np-submit" (click)="submitEdit()" [disabled]="editSubmitting()">
@@ -322,7 +322,7 @@
   </div>
 }
 
-<!-- ── Cancel Project Confirmation Modal ── -->
+
 @if (showCancelModal()) {
   <div class="np-backdrop" (click)="closeCancelModal()">
     <div class="np-modal" (click)="$event.stopPropagation()">
@@ -359,7 +359,7 @@
   </div>
 }
 
-<!-- ── Delete Project Confirmation Modal ── -->
+
 @if (showDeleteModal()) {
   <div class="np-backdrop" (click)="closeDeleteModal()">
     <div class="np-modal" (click)="$event.stopPropagation()">

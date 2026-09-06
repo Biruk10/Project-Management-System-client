@@ -4,7 +4,7 @@
   }
 
   @if (project()) {
-    <!-- Header -->
+    
     <div class="page-header">
       <div>
         <a routerLink="/projects" class="back-btn">← Projects</a>
@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <!-- Stat strip -->
+    
     <div class="stat-strip">
       <div class="stat-box">
         <div class="stat-box-label">Progress</div>
@@ -94,10 +94,10 @@
       </div>
     }
 
-    <!-- Two-column detail -->
+    
     <div class="detail-grid">
 
-      <!-- Budget & Expenses Card -->
+      
       <div class="card detail-card">
         <div class="detail-card-header" style="display:flex;justify-content:space-between;align-items:center">
           <span>💰 Budget & Expenses</span>
@@ -186,7 +186,7 @@
         </div>
       </div>
 
-      <!-- Team Members -->
+      
       <div class="card detail-card">
         <div class="detail-card-header" style="display:flex;justify-content:space-between;align-items:center">
           <span>👥 Team Members</span>
@@ -214,7 +214,7 @@
         </div>
       </div>
 
-      <!-- Recent Tasks -->
+      
       <div class="card detail-card" style="grid-column:1 / -1">
         <div class="detail-card-header">✅ Recent Tasks</div>
         <div class="detail-card-body">
@@ -251,7 +251,7 @@
 
     </div>
 
-    <!-- Budget requests are visible to both sides; only admins get review actions. -->
+    
     @if (budgetRequests().length > 0) {
       <div class="card detail-card project-requests-card">
         <div class="detail-card-header">📨 Budget Requests</div>
@@ -278,7 +278,7 @@
   }
 </div>
 
-<!-- ── Edit Project Modal ── -->
+
 @if (showUpdateForm()) {
   <div class="pd-backdrop" (click)="closeUpdateForm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -364,7 +364,7 @@
   </div>
 }
 
-<!-- ── Cancel Project Confirmation Modal ── -->
+
 @if (showCancelConfirm()) {
   <div class="pd-backdrop" (click)="closeCancelConfirm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -401,7 +401,7 @@
   </div>
 }
 
-<!-- ── Delete Project Confirmation Modal ── -->
+
 @if (showDeleteConfirm()) {
   <div class="pd-backdrop" (click)="closeDeleteConfirm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -440,7 +440,7 @@
   </div>
 }
 
-<!-- ── Add Budget Modal ── -->
+
 @if (showAddBudget()) {
   <div class="pd-backdrop" (click)="closeAddBudgetForm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -486,7 +486,7 @@
   </div>
 }
 
-<!-- ── Record Expense Modal ── -->
+
 @if (showExpenseForm()) {
   <div class="pd-backdrop" (click)="closeExpenseForm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -574,7 +574,7 @@
   </div>
 }
 
-<!-- ── Update Progress Modal (Project Manager) ── -->
+
 @if (showProgressForm()) {
   <div class="pd-backdrop" (click)="closeProgressForm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -642,7 +642,7 @@
   </div>
 }
 
-<!-- ── Category Budget History ── -->
+
 @if (showCategoryHistory()) {
   <div class="pd-backdrop" (click)="closeCategoryHistory()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -682,7 +682,7 @@
   </div>
 }
 
-<!-- ── New Budget Request ── -->
+
 @if (showRequestModal()) {
   <div class="pd-backdrop" (click)="closeBudgetRequestModal()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -730,7 +730,7 @@
   </div>
 }
 
-<!-- ── Review Budget Request ── -->
+
 @if (showReviewModal() && reviewTarget()) {
   <div class="pd-backdrop" (click)="closeReviewModal()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -763,7 +763,7 @@
   </div>
 }
 
-<!-- ── Add Project Team Member ── -->
+
 @if (showAddMemberModal()) {
   <div class="pd-backdrop" (click)="closeAddMemberModal()">
     <div class="pd-modal" (click)="$event.stopPropagation()">

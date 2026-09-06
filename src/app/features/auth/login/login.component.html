@@ -1,6 +1,6 @@
-﻿<div class="login-wrapper">
+<div class="login-wrapper">
   <div class="login-container">
-    <!-- Brand Header -->
+    
     <div class="login-brand">
       <div class="brand-badge">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -10,7 +10,7 @@
       <span class="brand-name">OrgPlatform</span>
     </div>
 
-    <!-- Login Card -->
+    
     <div class="login-card">
       <div class="card-header">
         <h1 class="card-title">Welcome back</h1>
@@ -29,7 +29,7 @@
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
-        <!-- Email Field -->
+        
         <div class="form-field">
           <label for="email" class="field-label">Email address</label>
           <div class="input-container">
@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <!-- Password Field -->
+        
         <div class="form-field">
           <label for="password" class="field-label">Password</label>
           <div class="input-container">
@@ -86,7 +86,7 @@
           </div>
         </div>
 
-        <!-- Submit Button -->
+        
         <button type="submit" class="submit-button" [disabled]="loading() || form.invalid">
           @if (loading()) {
             <span class="loading-spinner"></span>
@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <!-- Simple light footer -->
+    
     <div class="login-footer">
       <span>© 2026 OrgPlatform. All rights reserved.</span>
     </div>

@@ -1,4 +1,3 @@
-﻿// ── Table cells ─────────────────────────────────────────────────────────────
 
 .user-cell { display: flex; align-items: center; gap: 10px; }
 
@@ -58,7 +57,6 @@
   }
 }
 
-// ── New User Modal ───────────────────────────────────────────────────────────
 
 .nu-backdrop {
   position: fixed; inset: 0;
@@ -213,7 +211,6 @@
   vertical-align: middle;
 }
 
-// ── Roles cell with Assign Task button ───────────────────────────────────────
 
 .role-cell {
   display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;
@@ -233,7 +230,6 @@
   }
 }
 
-// ── Assign Task Modal ────────────────────────────────────────────────────────
 
 .at-backdrop {
   position: fixed; inset: 0;

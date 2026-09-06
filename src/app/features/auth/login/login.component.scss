@@ -1,4 +1,4 @@
-﻿.login-wrapper {
+.login-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -18,7 +18,6 @@
   gap: 24px;
 }
 
-// Brand Header
 .login-brand {
   display: flex;
   align-items: center;
@@ -44,7 +43,6 @@
   letter-spacing: -0.02em;
 }
 
-// Card
 .login-card {
   width: 100%;
   background: #ffffff;
@@ -74,7 +72,6 @@
   margin: 0;
 }
 
-// Alert
 .alert {
   display: flex;
   align-items: center;
@@ -96,7 +93,6 @@
   }
 }
 
-// Form
 .login-form {
   display: flex;
   flex-direction: column;
@@ -179,7 +175,6 @@
   }
 }
 
-// Button
 .submit-button {
   width: 100%;
   height: 44px;
@@ -226,7 +221,6 @@
   to { transform: rotate(360deg); }
 }
 
-// Card Footer
 .card-footer {
   margin-top: 24px;
   padding-top: 20px;
@@ -250,7 +244,6 @@
   }
 }
 
-// Simple Bottom Footer
 .login-footer {
   font-size: 12px;
   color: #94a3b8;

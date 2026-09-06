@@ -1,4 +1,4 @@
-﻿<div class="page animate-in">
+<div class="page animate-in">
 
   <div class="page-header">
     <div>
@@ -47,7 +47,7 @@
         <tbody>
           @for (user of result()?.items; track user.id) {
             <tr>
-              <!-- User cell -->
+              
               <td>
                 <div class="user-cell">
                   <div class="u-avatar">{{ user.firstName[0].toUpperCase() }}</div>
@@ -58,7 +58,7 @@
                 </div>
               </td>
 
-              <!-- Roles + Assign Task button -->
+              
               <td>
                 <div class="role-cell">
                   <div class="role-tags">
@@ -79,7 +79,7 @@
                 </div>
               </td>
 
-              <!-- Status -->
+              
               <td>
                 <span class="status-chip" [class.active]="user.isActive" [class.inactive]="!user.isActive">
                   <span class="status-dot"></span>
@@ -90,7 +90,7 @@
               <td class="td-muted">{{ user.lastLoginAt ? (user.lastLoginAt | date:'MMM d, y') : 'Never' }}</td>
               <td class="td-muted">{{ user.createdAt | date:'MMM d, y' }}</td>
 
-              <!-- Toggle active -->
+              
               <td>
                 <button class="btn-toggle"
                         [class.deactivate]="user.isActive"
@@ -114,9 +114,7 @@
 
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     New User Modal
-     ════════════════════════════════════════════════════════════ -->
+
 @if (showNewUser()) {
   <div class="nu-backdrop" (click)="closeNewUser()">
     <div class="nu-modal" (click)="$event.stopPropagation()">
@@ -200,14 +198,12 @@
   </div>
 }
 
-<!-- ════════════════════════════════════════════════════════════
-     Assign Task Modal
-     ════════════════════════════════════════════════════════════ -->
+
 @if (showAssignTask()) {
   <div class="at-backdrop" (click)="closeAssignTask()">
     <div class="at-modal" (click)="$event.stopPropagation()">
 
-      <!-- Header -->
+      
       <div class="at-header">
         <div class="at-header-left">
           <div class="at-icon">
@@ -231,7 +227,7 @@
         </button>
       </div>
 
-      <!-- Alerts -->
+      
       @if (taskError()) {
         <div class="at-alert error">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -251,7 +247,7 @@
         </div>
       }
 
-      <!-- Body -->
+      
       <div class="at-body">
 
         <div class="at-field">
@@ -293,7 +289,7 @@
 
       </div>
 
-      <!-- Footer -->
+      
       <div class="at-footer">
         <button class="at-cancel" (click)="closeAssignTask()" [disabled]="taskSubmitting()">Cancel</button>
         <button class="at-submit" (click)="submitAssignTask()" [disabled]="taskSubmitting()">

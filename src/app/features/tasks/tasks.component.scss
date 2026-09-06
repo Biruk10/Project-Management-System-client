@@ -1,8 +1,4 @@
-// ── Page shell — reuse global utilities ──────────────────────────────────────
-// (global styles.scss already defines .page, .page-header, .table-wrapper,
-//  .data-table, .badge-*, .progress-bar-track, .progress-bar-fill, .pagination)
 
-// ── Table cell styles ─────────────────────────────────────────────────────────
 .task-title-cell { font-weight: 500; color: var(--gray-800); }
 
 .priority-badge {
@@ -16,7 +12,6 @@
 
 .overdue { color: var(--danger); font-weight: 600; }
 
-// ── Progress column ───────────────────────────────────────────────────────────
 .progress-cell {
   display: flex; align-items: center; gap: 8px;
 }
@@ -36,7 +31,6 @@
   }
 }
 
-// ── Update Progress Modal ─────────────────────────────────────────────────────
 
 .tp-backdrop {
   position: fixed; inset: 0;
@@ -106,7 +100,6 @@
   }
 }
 
-// Status pill buttons
 .status-pills {
   display: flex; gap: 6px; flex-wrap: wrap;
 }
@@ -125,7 +118,6 @@
   &.pill-4 { &.selected, &:hover:not(:disabled) { background: var(--success-light); color: #065f46; border-color: #6ee7b7; } }
 }
 
-// Slider
 .progress-slider {
   -webkit-appearance: none; appearance: none;
   width: 100%; height: 6px; border-radius: 3px;
@@ -151,7 +143,6 @@
   font-size: 10px; color: var(--gray-400); margin-top: -4px;
 }
 
-// Preview bar
 .preview-bar-wrap { padding: 0 2px; }
 .preview-bar-track {
   height: 10px; background: var(--gray-100);
@@ -164,7 +155,6 @@
   transition: width 0.25s ease;
 }
 
-// Footer
 .tp-footer {
   display: flex; justify-content: flex-end; align-items: center; gap: 8px;
   padding: 13px 20px 16px; border-top: 1px solid var(--gray-100); flex-shrink: 0;

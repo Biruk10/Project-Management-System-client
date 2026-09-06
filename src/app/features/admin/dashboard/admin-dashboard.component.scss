@@ -1,12 +1,9 @@
-﻿.admin-page {
+.admin-page {
   padding: 8px 0 32px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #0f172a;
 }
 
-// ============================================
-// HEADER
-// ============================================
 .dashboard-header {
   display: flex;
   align-items: flex-start;
@@ -150,7 +147,6 @@
   }
 }
 
-// Loading state
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -175,9 +171,6 @@
   color: #64748b;
 }
 
-// ============================================
-// TOP EXECUTIVE KPIS
-// ============================================
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -299,9 +292,6 @@
   font-weight: 500;
 }
 
-// ============================================
-// MAIN CONTENT PANELS
-// ============================================
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -387,7 +377,6 @@
   padding: 16px 20px;
 }
 
-// Organizations List
 .org-item-list {
   display: flex;
   flex-direction: column;
@@ -488,7 +477,6 @@
   color: #94a3b8;
 }
 
-// Activity Stream
 .activity-stream {
   display: flex;
   flex-direction: column;
@@ -570,7 +558,6 @@
   color: #cbd5e1;
 }
 
-// Financial Meter & Runway
 .financial-meter-container {
   margin-bottom: 20px;
 }
@@ -639,7 +626,6 @@
   font-size: 13px;
 }
 
-// Responsive
 @media (max-width: 1200px) {
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
