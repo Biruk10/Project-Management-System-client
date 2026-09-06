@@ -14,11 +14,24 @@ export interface Project {
 }
 
 export interface ProjectMember {
-  userId: number;
+  id: number;
+  userId?: number;
+  firstName?: string;
+  lastName?: string;
   fullName: string;
   email: string;
+  phone?: string;
   projectRole: string;
   joinedAt: string;
+}
+
+export interface AddProjectMemberRequest {
+  userId?: number;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  phone?: string;
+  projectRole: string;
 }
 
 export interface CreateProjectRequest {
@@ -27,6 +40,8 @@ export interface CreateProjectRequest {
   startDate: string;
   endDate?: string;
   projectManagerId?: number;
+  initialBudget?: number;
+  budgetCategory?: string;
 }
 
 export interface UpdateProjectRequest {

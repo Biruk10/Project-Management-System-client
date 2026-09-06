@@ -2,7 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { PagedResult } from '../models/api.models';
-import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectFilterParams, ProjectMember } from '../models/project.models';
+import {
+  Project,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  ProjectFilterParams,
+  ProjectMember,
+  AddProjectMemberRequest
+} from '../models/project.models';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
@@ -28,11 +35,11 @@ export class ProjectService {
     return this.api.delete<void>(`/projects/${id}`);
   }
 
-  addMember(projectId: number, userId: number, projectRole: string): Observable<Project> {
-    return this.api.post<Project>(`/projects/${projectId}/members`, { userId, projectRole });
+  addMember(projectId: number, member: AddProjectMemberRequest | { userId: number; projectRole: string }): Observable<Project> {
+    return this.api.post<Project>(`/projects/${projectId}/members`, member);
   }
 
-  removeMember(projectId: number, userId: number): Observable<void> {
-    return this.api.delete<void>(`/projects/${projectId}/members/${userId}`);
+  removeMember(projectId: number, memberId: number): Observable<void> {
+    return this.api.delete<void>(`/projects/${projectId}/members/${memberId}`);
   }
 }

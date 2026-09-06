@@ -2,7 +2,16 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { PagedResult } from '../models/api.models';
-import { Budget, Expense, CreateBudgetRequest, CreateExpenseRequest, ExpenseFilterParams } from '../models/finance.models';
+import {
+  Budget,
+  Expense,
+  CreateBudgetRequest,
+  CreateExpenseRequest,
+  ExpenseFilterParams,
+  BudgetRequest,
+  CreateBudgetRequestPayload,
+  ReviewBudgetRequestPayload
+} from '../models/finance.models';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -38,5 +47,25 @@ export class FinanceService {
 
   deleteExpense(id: number): Observable<void> {
     return this.api.delete<void>(`/expenses/${id}`);
+  }
+
+  getBudgetRequestsByProject(projectId: number): Observable<BudgetRequest[]> {
+    return this.api.get<BudgetRequest[]>(`/budget-requests/project/${projectId}`);
+  }
+
+  getPendingBudgetRequests(): Observable<BudgetRequest[]> {
+    return this.api.get<BudgetRequest[]>('/budget-requests/pending');
+  }
+
+  getAllBudgetRequests(projectId?: number, status?: string): Observable<BudgetRequest[]> {
+    return this.api.get<BudgetRequest[]>('/budget-requests', { projectId, status } as Record<string, string | number | boolean | undefined>);
+  }
+
+  createBudgetRequest(payload: CreateBudgetRequestPayload): Observable<BudgetRequest> {
+    return this.api.post<BudgetRequest>('/budget-requests', payload);
+  }
+
+  reviewBudgetRequest(id: number, payload: ReviewBudgetRequestPayload): Observable<BudgetRequest> {
+    return this.api.post<BudgetRequest>(`/budget-requests/${id}/review`, payload);
   }
 }

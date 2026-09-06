@@ -16,7 +16,7 @@
 
   <div class="filters">
     <input class="filter-input" [(ngModel)]="search" (ngModelChange)="onSearch()" placeholder="🔍  Search projects…" />
-    <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onSearch()">
+    <select class="filter-select" aria-label="Filter projects by status" [(ngModel)]="statusFilter" (ngModelChange)="onSearch()">
       <option value="">All Status</option>
       <option value="NotStarted">Not Started</option>
       <option value="InProgress">In Progress</option>
@@ -102,7 +102,16 @@
                 </div>
               </td>
               <td>
-                <a [routerLink]="['/projects', p.id]" class="btn-ghost btn-sm">View →</a>
+                <div class="table-actions">
+                  <a [routerLink]="['/projects', p.id]" class="btn-ghost btn-sm">View →</a>
+                  @if (!isProjectManager) {
+                    <button class="btn-ghost btn-sm" (click)="openEdit(p)" title="Edit project">✏️ Edit</button>
+                    @if (!isCancelled(p)) {
+                      <button class="btn-ghost btn-sm" (click)="openCancel(p)" title="Cancel project">🚫 Cancel</button>
+                    }
+                    <button class="btn-danger-outline btn-sm" (click)="openDelete(p)" title="Delete project">🗑️</button>
+                  }
+                </div>
               </td>
             </tr>
           }
@@ -136,7 +145,7 @@
             <p class="np-sub">Fill in the details to create a project</p>
           </div>
         </div>
-        <button class="np-close" (click)="closeModal()" [disabled]="submitting()">
+        <button type="button" class="np-close" (click)="closeModal()" [disabled]="submitting()" aria-label="Close new project dialog" title="Close">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -167,18 +176,30 @@
 
         <div class="np-row">
           <div class="np-field">
-            <label>Start Date <span class="req">*</span></label>
-            <input type="date" [(ngModel)]="form.startDate" [disabled]="submitting()" />
+            <label for="project-start-date">Start Date <span class="req">*</span></label>
+            <input id="project-start-date" type="date" [(ngModel)]="form.startDate" [disabled]="submitting()" />
           </div>
           <div class="np-field">
-            <label>End Date</label>
-            <input type="date" [(ngModel)]="form.endDate" [disabled]="submitting()" />
+            <label for="project-end-date">End Date</label>
+            <input id="project-end-date" type="date" [(ngModel)]="form.endDate" [disabled]="submitting()" />
+          </div>
+        </div>
+
+        <div class="np-row">
+          <div class="np-field">
+            <label>Initial Budget ($) <span class="req">*</span></label>
+            <input type="number" [(ngModel)]="form.initialBudget" min="1" step="1"
+                   placeholder="e.g. 50000" [disabled]="submitting()" />
+          </div>
+          <div class="np-field">
+            <label>Budget Category</label>
+            <input [(ngModel)]="form.budgetCategory" placeholder="e.g. General, Operations" [disabled]="submitting()" />
           </div>
         </div>
 
         <div class="np-field">
-          <label>Project Manager</label>
-          <select [(ngModel)]="form.projectManagerId" [disabled]="submitting()">
+          <label for="project-manager">Project Manager</label>
+          <select id="project-manager" [(ngModel)]="form.projectManagerId" [disabled]="submitting()">
             <option [ngValue]="null">— Unassigned —</option>
             @for (u of users(); track u.id) {
               <option [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }} ({{ u.roles.join(', ') }})</option>
@@ -203,6 +224,176 @@
         </button>
       </div>
 
+    </div>
+  </div>
+}
+
+<!-- ── Edit Project Modal ── -->
+@if (showEditModal()) {
+  <div class="np-backdrop" (click)="closeEditModal()">
+    <div class="np-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="np-header">
+        <div class="np-header-left">
+          <div class="np-icon">✏️</div>
+          <div>
+            <h2 class="np-title">Edit Project</h2>
+            <p class="np-sub">Update project details, manager, and status</p>
+          </div>
+        </div>
+        <button class="np-close" (click)="closeEditModal()" [disabled]="editSubmitting()">✕</button>
+      </div>
+
+      @if (editError()) {
+        <div class="np-alert">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ editError() }}
+        </div>
+      }
+
+      <!-- Body -->
+      <div class="np-body">
+
+        <div class="np-field">
+          <label>Project Name <span class="req">*</span></label>
+          <input [(ngModel)]="editForm.name" placeholder="Project name" [disabled]="editSubmitting()" />
+        </div>
+
+        <div class="np-field">
+          <label>Description</label>
+          <textarea [(ngModel)]="editForm.description" placeholder="Brief description…" rows="2" [disabled]="editSubmitting()"></textarea>
+        </div>
+
+        <div class="np-row">
+          <div class="np-field">
+            <label for="edit-project-start-date">Start Date <span class="req">*</span></label>
+            <input id="edit-project-start-date" type="date" [(ngModel)]="editForm.startDate" [disabled]="editSubmitting()" />
+          </div>
+          <div class="np-field">
+            <label for="edit-project-end-date">End Date</label>
+            <input id="edit-project-end-date" type="date" [(ngModel)]="editForm.endDate" [disabled]="editSubmitting()" />
+          </div>
+        </div>
+
+        <div class="np-row">
+          <div class="np-field">
+            <label for="edit-project-manager">Project Manager</label>
+            <select id="edit-project-manager" [(ngModel)]="editForm.projectManagerId" [disabled]="editSubmitting()">
+              <option [ngValue]="null">— Unassigned —</option>
+              @for (u of users(); track u.id) {
+                <option [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="np-field">
+            <label for="edit-project-status">Status</label>
+            <select id="edit-project-status" [(ngModel)]="editForm.status" [disabled]="editSubmitting()">
+              @for (s of projectStatuses; track s.value) {
+                <option [ngValue]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="np-field">
+          <label for="edit-project-progress">Progress (0–100 %)</label>
+          <input id="edit-project-progress" type="number" [(ngModel)]="editForm.progressPercentage" min="0" max="100" [disabled]="editSubmitting()" />
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="np-footer">
+        <button class="np-cancel" (click)="closeEditModal()" [disabled]="editSubmitting()">Cancel</button>
+        <button class="np-submit" (click)="submitEdit()" [disabled]="editSubmitting()">
+          @if (editSubmitting()) {
+            <span class="np-spin"></span> Saving…
+          } @else {
+            ✓ Save Changes
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── Cancel Project Confirmation Modal ── -->
+@if (showCancelModal()) {
+  <div class="np-backdrop" (click)="closeCancelModal()">
+    <div class="np-modal" (click)="$event.stopPropagation()">
+      <div class="np-header">
+        <div class="np-header-left">
+          <div class="np-icon" style="background:#fee2e2;color:#dc2626">🚫</div>
+          <div>
+            <h2 class="np-title">Cancel Project</h2>
+            <p class="np-sub">Set status to Cancelled</p>
+          </div>
+        </div>
+        <button class="np-close" (click)="closeCancelModal()" [disabled]="cancelSubmitting()">✕</button>
+      </div>
+
+      @if (cancelError()) {
+        <div class="np-alert">⚠ {{ cancelError() }}</div>
+      }
+
+      <div class="np-body">
+        <p style="font-size:14px;color:var(--gray-700);line-height:1.5;margin:0">
+          Are you sure you want to cancel <strong>{{ cancellingProject()?.name }}</strong>?
+          The project status will be marked as <strong>Cancelled</strong>.
+        </p>
+      </div>
+
+      <div class="np-footer">
+        <button class="np-cancel" (click)="closeCancelModal()" [disabled]="cancelSubmitting()">Keep Active</button>
+        <button class="np-submit danger" (click)="confirmCancel()" [disabled]="cancelSubmitting()">
+          @if (cancelSubmitting()) { <span class="np-spin"></span> Cancelling… }
+          @else { 🚫 Yes, Cancel Project }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Delete Project Confirmation Modal ── -->
+@if (showDeleteModal()) {
+  <div class="np-backdrop" (click)="closeDeleteModal()">
+    <div class="np-modal" (click)="$event.stopPropagation()">
+      <div class="np-header">
+        <div class="np-header-left">
+          <div class="np-icon" style="background:#fee2e2;color:#dc2626">🗑️</div>
+          <div>
+            <h2 class="np-title">Delete Project</h2>
+            <p class="np-sub">Permanent deletion</p>
+          </div>
+        </div>
+        <button class="np-close" (click)="closeDeleteModal()" [disabled]="deleteSubmitting()">✕</button>
+      </div>
+
+      @if (deleteError()) {
+        <div class="np-alert">⚠ {{ deleteError() }}</div>
+      }
+
+      <div class="np-body">
+        <p style="font-size:14px;color:var(--gray-700);line-height:1.5;margin:0">
+          Are you sure you want to permanently delete <strong>{{ deletingProject()?.name }}</strong>?
+        </p>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#991b1b;margin-top:10px">
+          ⚠️ <strong>Warning:</strong> This cannot be undone. All tasks, budgets, and expenses for this project will be deleted.
+        </div>
+      </div>
+
+      <div class="np-footer">
+        <button class="np-cancel" (click)="closeDeleteModal()" [disabled]="deleteSubmitting()">Cancel</button>
+        <button class="np-submit danger" (click)="confirmDelete()" [disabled]="deleteSubmitting()">
+          @if (deleteSubmitting()) { <span class="np-spin"></span> Deleting… }
+          @else { 🗑️ Yes, Delete Project }
+        </button>
+      </div>
     </div>
   </div>
 }

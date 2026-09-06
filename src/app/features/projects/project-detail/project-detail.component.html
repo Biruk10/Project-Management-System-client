@@ -20,9 +20,18 @@
         <span class="badge" [ngClass]="statusClass(project()!.status)" style="font-size:13px;padding:6px 14px">
           {{ statusLabel(project()!.status) }}
         </span>
-        @if (canManageProject) {
-          <button class="btn-secondary btn-sm" (click)="openUpdateForm()">✏️ Update Project</button>
-          <button class="btn-outline btn-sm"   (click)="openExpenseForm()">💸 Record Expense</button>
+        @if (isOrgAdmin) {
+          <button class="btn-secondary btn-sm" (click)="openUpdateForm()">✏️ Edit Project</button>
+          @if (!isCancelled()) {
+            <button class="btn-outline btn-sm" (click)="openCancelConfirm()">🚫 Cancel Project</button>
+          }
+          <button class="btn-outline btn-sm" (click)="openExpenseForm()" [title]="hasBudget() ? 'Record an expense' : 'Set a budget first to record expenses'">
+            💸 Record Expense
+          </button>
+          <button class="btn-danger-outline btn-sm" (click)="openDeleteConfirm()">🗑️ Delete</button>
+        }
+        @if (canManageProject && !isOrgAdmin) {
+          <button class="btn-secondary btn-sm" (click)="openProgressForm()">📊 Update Progress</button>
         }
       </div>
     </div>
@@ -34,6 +43,23 @@
         <div class="stat-box-val">{{ project()!.progressPercentage }}%</div>
         <div class="progress-bar-track" style="width:100%;margin-top:6px">
           <div class="progress-bar-fill" [style.width.%]="project()!.progressPercentage"></div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">Budget</div>
+        <div class="stat-box-val">
+          @if (hasBudget()) {
+            ${{ primaryBudget()!.totalAmount | number:'1.0-0' }}
+          } @else {
+            <span class="text-muted" style="font-size:14px">Not Set</span>
+          }
+        </div>
+        <div style="font-size:11px;color:var(--gray-500);margin-top:4px">
+          @if (hasBudget()) {
+            ${{ primaryBudget()!.remainingBudget | number:'1.0-0' }} left
+          } @else {
+            Budget required
+          }
         </div>
       </div>
       <div class="stat-box">
@@ -51,21 +77,123 @@
         </div>
       </div>
       <div class="stat-box">
-        <div class="stat-box-label">Members</div>
-        <div class="stat-box-val">{{ project()!.members.length }}</div>
-      </div>
-      <div class="stat-box">
         <div class="stat-box-label">Tasks</div>
         <div class="stat-box-val">{{ tasks()?.totalCount ?? '…' }}</div>
       </div>
     </div>
 
+    @if (!hasBudget()) {
+      <div class="budget-alert-banner">
+        <div class="bab-left">
+          <span style="font-size:18px">⚠️</span>
+          <span><strong>No budget allocated.</strong> Organization admin must set a project budget before expenses can be recorded.</span>
+        </div>
+        @if (isOrgAdmin) {
+          <button class="btn-primary btn-sm" (click)="openAddBudgetForm()">+ Set Project Budget</button>
+        }
+      </div>
+    }
+
     <!-- Two-column detail -->
     <div class="detail-grid">
 
+      <!-- Budget & Expenses Card -->
+      <div class="card detail-card">
+        <div class="detail-card-header" style="display:flex;justify-content:space-between;align-items:center">
+          <span>💰 Budget & Expenses</span>
+          @if (isOrgAdmin && !hasBudget()) {
+            <button class="btn-primary btn-sm" style="font-size:12px;padding:4px 10px" (click)="openAddBudgetForm()">+ Set Budget</button>
+          } @else if (isOrgAdmin && hasBudget()) {
+            <button class="btn-outline btn-sm" style="font-size:12px;padding:4px 10px" (click)="openExpenseForm()">💸 Record Expense</button>
+          }
+        </div>
+        <div class="detail-card-body" style="padding:16px">
+          @if (!hasBudget()) {
+            <div class="empty-state" style="padding:20px 0">
+              <div class="empty-icon">🪙</div>
+              <div class="empty-title">No budget allocated</div>
+              <div class="empty-desc" style="margin-top:6px;font-size:12.5px;color:var(--gray-500)">
+                A project budget is required before recording expenses.
+              </div>
+              @if (isOrgAdmin) {
+                <button class="btn-primary btn-sm" style="margin-top:12px" (click)="openAddBudgetForm()">
+                  + Allocate Initial Budget
+                </button>
+              }
+            </div>
+          } @else {
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:var(--gray-50);padding:10px;border-radius:8px;border:1px solid var(--gray-200)">
+                <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase">Total Budget</div>
+                <div style="font-size:16px;font-weight:700;color:var(--gray-900);margin-top:2px">
+                  ${{ primaryBudget()!.totalAmount | number:'1.2-2' }}
+                </div>
+              </div>
+              <div style="background:var(--gray-50);padding:10px;border-radius:8px;border:1px solid var(--gray-200)">
+                <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase">Total Spent</div>
+                <div style="font-size:16px;font-weight:700;color:#dc2626;margin-top:2px">
+                  ${{ primaryBudget()!.totalExpenses | number:'1.2-2' }}
+                </div>
+              </div>
+              <div style="background:var(--gray-50);padding:10px;border-radius:8px;border:1px solid var(--gray-200)">
+                <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase">Remaining</div>
+                <div style="font-size:16px;font-weight:700;color:#15803d;margin-top:2px">
+                  ${{ primaryBudget()!.remainingBudget | number:'1.2-2' }}
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px">
+                <span style="color:var(--gray-600)">Budget Utilization</span>
+                <span [style.color]="primaryBudget()!.utilizationPercentage > 90 ? '#dc2626' : 'var(--gray-800)'">
+                  {{ primaryBudget()!.utilizationPercentage }}%
+                </span>
+              </div>
+              <div class="progress-bar-track" style="width:100%;height:8px">
+                <div class="progress-bar-fill" [style.width.%]="primaryBudget()!.utilizationPercentage > 100 ? 100 : primaryBudget()!.utilizationPercentage"
+                     [style.background]="primaryBudget()!.utilizationPercentage > 90 ? '#dc2626' : 'var(--primary)'"></div>
+              </div>
+            </div>
+
+            <div style="font-size:12px;font-weight:700;color:var(--gray-600);text-transform:uppercase;margin-bottom:6px">Budget Categories</div>
+            <div class="budget-category-list">
+              @for (entry of budgetCategories(); track entry.category) {
+                <div class="budget-category-row">
+                  <div class="budget-category-main">
+                    <strong>{{ entry.category }}</strong>
+                    @if (entry.line) {
+                      <span class="budget-category-meta">
+                        Used ${{ entry.line.spentAmount | number:'1.0-0' }} · Remaining ${{ (entry.line.allocatedAmount - entry.line.spentAmount) | number:'1.0-0' }}
+                      </span>
+                    } @else {
+                      <span class="budget-category-meta">No allocation yet</span>
+                    }
+                  </div>
+                  <div class="budget-category-actions">
+                    <span class="budget-category-amount">${{ entry.line?.allocatedAmount ?? 0 | number:'1.0-0' }}</span>
+                    @if (entry.line) {
+                      <button class="btn-link btn-sm" (click)="openCategoryHistory(entry.line!)">History</button>
+                    }
+                    @if (canManageProject && !isOrgAdmin) {
+                      <button class="btn-outline btn-sm" (click)="openBudgetRequestModal(entry.category, entry.line?.id)">Request</button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
       <!-- Team Members -->
       <div class="card detail-card">
-        <div class="detail-card-header">👥 Team Members</div>
+        <div class="detail-card-header" style="display:flex;justify-content:space-between;align-items:center">
+          <span>👥 Team Members</span>
+          @if (canManageProject) {
+            <button class="btn-outline btn-sm" (click)="openAddMemberModal()">+ Add Member</button>
+          }
+        </div>
         <div class="detail-card-body">
           @if (project()!.members.length === 0) {
             <div class="empty-state">
@@ -87,7 +215,7 @@
       </div>
 
       <!-- Recent Tasks -->
-      <div class="card detail-card">
+      <div class="card detail-card" style="grid-column:1 / -1">
         <div class="detail-card-header">✅ Recent Tasks</div>
         <div class="detail-card-body">
           @if (!tasks() || tasks()!.items.length === 0) {
@@ -122,10 +250,35 @@
       </div>
 
     </div>
+
+    <!-- Budget requests are visible to both sides; only admins get review actions. -->
+    @if (budgetRequests().length > 0) {
+      <div class="card detail-card project-requests-card">
+        <div class="detail-card-header">📨 Budget Requests</div>
+        <div class="detail-card-body">
+          @for (request of budgetRequests(); track request.id) {
+            <div class="budget-request-row">
+              <div class="budget-request-main">
+                <strong>{{ request.category }}</strong>
+                <span>{{ request.projectManagerName ?? 'Project Manager' }} · {{ request.reason }}</span>
+              </div>
+              <div class="budget-request-values">
+                <span>${{ request.currentBudget | number:'1.0-0' }} → ${{ request.requestedAmount | number:'1.0-0' }}</span>
+                <span class="request-status" [class.pending]="request.status === 'Pending'" [class.approved]="request.status === 'Approved'" [class.declined]="request.status === 'Declined'">{{ request.status }}</span>
+                @if (isOrgAdmin && request.status === 'Pending') {
+                  <button class="btn-primary btn-sm" (click)="openReviewModal(request, true)">Approve</button>
+                  <button class="btn-danger-outline btn-sm" (click)="openReviewModal(request, false)">Decline</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
   }
 </div>
 
-<!-- ── Update Project Modal ── -->
+<!-- ── Edit Project Modal ── -->
 @if (showUpdateForm()) {
   <div class="pd-backdrop" (click)="closeUpdateForm()">
     <div class="pd-modal" (click)="$event.stopPropagation()">
@@ -134,8 +287,8 @@
         <div class="pd-header-left">
           <div class="pd-icon">✏️</div>
           <div>
-            <h2 class="pd-title">Update Project</h2>
-            <p class="pd-sub">Update status, progress, and end date</p>
+            <h2 class="pd-title">Edit Project</h2>
+            <p class="pd-sub">Update project name, manager, dates, and status</p>
           </div>
         </div>
         <button class="pd-close" (click)="closeUpdateForm()" [disabled]="updateSubmit()">✕</button>
@@ -150,29 +303,52 @@
 
       <div class="pd-body">
         <div class="pd-field">
-          <label>Status</label>
-          <select [(ngModel)]="updateForm.status" [disabled]="updateSubmit()">
-            @for (s of projectStatuses; track s.value) {
-              <option [ngValue]="s.value">{{ s.label }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="pd-field">
-          <label>Progress (0–100 %)</label>
-          <input type="number" [(ngModel)]="updateForm.progressPercentage"
-                 min="0" max="100" placeholder="0" [disabled]="updateSubmit()" />
-        </div>
-
-        <div class="pd-field">
-          <label>End Date</label>
-          <input type="date" [(ngModel)]="updateForm.endDate" [disabled]="updateSubmit()" />
+          <label>Project Name <span class="req">*</span></label>
+          <input [(ngModel)]="updateForm.name" placeholder="Project name" [disabled]="updateSubmit()" />
         </div>
 
         <div class="pd-field">
           <label>Description</label>
           <textarea [(ngModel)]="updateForm.description" rows="2"
                     placeholder="Project description…" [disabled]="updateSubmit()"></textarea>
+        </div>
+
+        <div class="pd-row">
+          <div class="pd-field">
+            <label for="project-start-date">Start Date <span class="req">*</span></label>
+            <input id="project-start-date" type="date" [(ngModel)]="updateForm.startDate" [disabled]="updateSubmit()" />
+          </div>
+          <div class="pd-field">
+            <label>End Date</label>
+            <input type="date" aria-label="End Date" [(ngModel)]="updateForm.endDate" [disabled]="updateSubmit()" />
+          </div>
+        </div>
+
+        <div class="pd-row">
+          <div class="pd-field">
+            <label for="project-manager-select">Project Manager</label>
+            <select id="project-manager-select" [(ngModel)]="updateForm.projectManagerId" [disabled]="updateSubmit()">
+              <option [ngValue]="null">— Unassigned —</option>
+              @for (u of users(); track u.id) {
+                <option [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="pd-field">
+            <label for="project-status-select">Status</label>
+            <select id="project-status-select" [(ngModel)]="updateForm.status" [disabled]="updateSubmit()">
+              @for (s of projectStatuses; track s.value) {
+                <option [ngValue]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pd-field">
+          <label>Progress (0–100 %)</label>
+          <input type="number" [(ngModel)]="updateForm.progressPercentage"
+                 min="0" max="100" placeholder="0" [disabled]="updateSubmit()" />
         </div>
       </div>
 
@@ -184,6 +360,128 @@
         </button>
       </div>
 
+    </div>
+  </div>
+}
+
+<!-- ── Cancel Project Confirmation Modal ── -->
+@if (showCancelConfirm()) {
+  <div class="pd-backdrop" (click)="closeCancelConfirm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon" style="background:#fee2e2;color:#dc2626">🚫</div>
+          <div>
+            <h2 class="pd-title">Cancel Project</h2>
+            <p class="pd-sub">Change project status to Cancelled</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeCancelConfirm()" [disabled]="cancelSubmit()">✕</button>
+      </div>
+
+      @if (cancelError()) {
+        <div class="pd-alert error">⚠ {{ cancelError() }}</div>
+      }
+
+      <div class="pd-body">
+        <p style="font-size:14px;color:var(--gray-700);line-height:1.5;margin:0">
+          Are you sure you want to cancel <strong>{{ project()?.name }}</strong>?
+          This will set the project status to <strong>Cancelled</strong>.
+        </p>
+      </div>
+
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeCancelConfirm()" [disabled]="cancelSubmit()">Keep Project Active</button>
+        <button class="pd-submit danger" (click)="confirmCancelProject()" [disabled]="cancelSubmit()">
+          @if (cancelSubmit()) { <span class="pd-spin"></span> Cancelling… }
+          @else { 🚫 Yes, Cancel Project }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Delete Project Confirmation Modal ── -->
+@if (showDeleteConfirm()) {
+  <div class="pd-backdrop" (click)="closeDeleteConfirm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon" style="background:#fee2e2;color:#dc2626">🗑️</div>
+          <div>
+            <h2 class="pd-title">Delete Project</h2>
+            <p class="pd-sub">Permanent deletion</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeDeleteConfirm()" [disabled]="deleteSubmit()">✕</button>
+      </div>
+
+      @if (deleteError()) {
+        <div class="pd-alert error">⚠ {{ deleteError() }}</div>
+      }
+
+      <div class="pd-body">
+        <p style="font-size:14px;color:var(--gray-700);line-height:1.5;margin:0">
+          Are you sure you want to permanently delete <strong>{{ project()?.name }}</strong>?
+        </p>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#991b1b;margin-top:10px">
+          ⚠️ <strong>Warning:</strong> This action cannot be undone. All tasks, budgets, and recorded expenses associated with this project will be deleted.
+        </div>
+      </div>
+
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeDeleteConfirm()" [disabled]="deleteSubmit()">Cancel</button>
+        <button class="pd-submit danger" (click)="confirmDeleteProject()" [disabled]="deleteSubmit()">
+          @if (deleteSubmit()) { <span class="pd-spin"></span> Deleting… }
+          @else { 🗑️ Yes, Delete Project }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Add Budget Modal ── -->
+@if (showAddBudget()) {
+  <div class="pd-backdrop" (click)="closeAddBudgetForm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">🪙</div>
+          <div>
+            <h2 class="pd-title">Set Project Budget</h2>
+            <p class="pd-sub">Allocate budget for this project</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeAddBudgetForm()" [disabled]="budgetSubmit()">✕</button>
+      </div>
+
+      @if (budgetError()) {
+        <div class="pd-alert error">⚠ {{ budgetError() }}</div>
+      }
+      @if (budgetSuccess()) {
+        <div class="pd-alert success">✓ {{ budgetSuccess() }}</div>
+      }
+
+      <div class="pd-body">
+        <div class="pd-field">
+          <label>Total Budget Amount ($) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="budgetForm.totalAmount" min="1" step="1"
+                 placeholder="e.g. 50000" [disabled]="budgetSubmit()" />
+        </div>
+
+        <div class="pd-field">
+          <label>Budget Category</label>
+          <input [(ngModel)]="budgetForm.category" placeholder="e.g. General, Operations, Development" [disabled]="budgetSubmit()" />
+        </div>
+      </div>
+
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeAddBudgetForm()" [disabled]="budgetSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitAddBudget()" [disabled]="budgetSubmit()">
+          @if (budgetSubmit()) { <span class="pd-spin"></span> Saving… }
+          @else { ✓ Save Budget }
+        </button>
+      </div>
     </div>
   </div>
 }
@@ -211,47 +509,295 @@
         <div class="pd-alert success">✓ {{ expenseSuccess() }}</div>
       }
 
-      <div class="pd-body">
-        <div class="pd-row">
-          <div class="pd-field">
-            <label>Amount <span class="req">*</span></label>
-            <input type="number" [(ngModel)]="expenseForm.amount" min="0.01" step="0.01"
-                   placeholder="0.00" [disabled]="expenseSubmit()" />
+      @if (!hasBudget()) {
+        <div class="pd-body">
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px;font-size:13.5px;color:#92400e;line-height:1.5">
+            ⚠️ <strong>Budget Required:</strong> An organization admin must allocate a project budget before expenses can be recorded.
           </div>
+          <button class="btn-primary btn-sm" style="margin-top:10px" (click)="closeExpenseForm(); openAddBudgetForm()">
+            + Set Project Budget Now
+          </button>
+        </div>
+        <div class="pd-footer">
+          <button class="pd-cancel" (click)="closeExpenseForm()">Close</button>
+        </div>
+      } @else {
+        <div class="pd-body">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12px;font-weight:600;color:#166534">Available Budget:</span>
+            <span style="font-size:14px;font-weight:700;color:#15803d">
+              ${{ primaryBudget()!.remainingBudget | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="pd-row">
+            <div class="pd-field">
+              <label>Amount <span class="req">*</span></label>
+              <input type="number" [(ngModel)]="expenseForm.amount" min="0.01" step="0.01"
+                     placeholder="0.00" [disabled]="expenseSubmit()" />
+            </div>
+            <div class="pd-field">
+              <label>Date <span class="req">*</span></label>
+              <input type="date" title="Expense date" [(ngModel)]="expenseForm.expenseDate" [disabled]="expenseSubmit()" />
+            </div>
+          </div>
+
           <div class="pd-field">
-            <label>Date <span class="req">*</span></label>
-            <input type="date" [(ngModel)]="expenseForm.expenseDate" [disabled]="expenseSubmit()" />
+            <label>Description <span class="req">*</span></label>
+            <input [(ngModel)]="expenseForm.description" placeholder="What was this expense for?" [disabled]="expenseSubmit()" />
+          </div>
+
+          @if (budgets().length > 0) {
+            <div class="pd-field">
+              <label for="expense-budget-line">Budget Line</label>
+              <select id="expense-budget-line" [(ngModel)]="expenseForm.budgetLineId" [disabled]="expenseSubmit()">
+                @for (b of budgets(); track b.id) {
+                  @for (line of b.budgetLines; track line.id) {
+                    <option [ngValue]="line.id">{{ line.category }} (${{ line.allocatedAmount | number:'1.0-0' }} allocated)</option>
+                  }
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <div class="pd-footer">
+          <button class="pd-cancel" (click)="closeExpenseForm()" [disabled]="expenseSubmit()">Cancel</button>
+          <button class="pd-submit" (click)="submitExpense()" [disabled]="expenseSubmit()">
+            @if (expenseSubmit()) { <span class="pd-spin"></span> Recording… }
+            @else { ✓ Record Expense }
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ── Update Progress Modal (Project Manager) ── -->
+@if (showProgressForm()) {
+  <div class="pd-backdrop" (click)="closeProgressForm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon" style="background:#eff6ff;color:#2563eb">📊</div>
+          <div>
+            <h2 class="pd-title">Update Progress</h2>
+            <p class="pd-sub">Update your project status and completion</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeProgressForm()" [disabled]="progressSubmit()">✕</button>
+      </div>
+
+      @if (progressError()) {
+        <div class="pd-alert error">⚠ {{ progressError() }}</div>
+      }
+      @if (progressSuccess()) {
+        <div class="pd-alert success">✓ {{ progressSuccess() }}</div>
+      }
+
+      <div class="pd-body">
+        <div class="pd-field">
+          <label>Status</label>
+          <div class="progress-option-grid">
+            @for (s of progressStatuses; track s.value) {
+              <button class="progress-option-btn"
+                      [class.active]="progressForm.status === s.value"
+                      (click)="progressForm.status = s.value"
+                      [disabled]="progressSubmit()">
+                {{ s.label }}
+              </button>
+            }
           </div>
         </div>
 
         <div class="pd-field">
-          <label>Description <span class="req">*</span></label>
-          <input [(ngModel)]="expenseForm.description" placeholder="What was this expense for?" [disabled]="expenseSubmit()" />
-        </div>
-
-        @if (budgets().length > 0) {
-          <div class="pd-field">
-            <label>Budget Line</label>
-            <select [(ngModel)]="expenseForm.budgetLineId" [disabled]="expenseSubmit()">
-              <option [ngValue]="null">— None —</option>
-              @for (b of budgets(); track b.id) {
-                @for (line of b.budgetLines; track line.id) {
-                  <option [ngValue]="line.id">{{ line.category }} (${{ line.allocatedAmount | number:'1.0-0' }} allocated)</option>
-                }
-              }
-            </select>
+          <label>Completion — {{ progressForm.completion }}%</label>
+          <div class="progress-option-grid">
+            @for (pct of completionOptions; track pct) {
+              <button class="progress-option-btn"
+                      [class.active]="progressForm.completion === pct"
+                      (click)="progressForm.completion = pct"
+                      [disabled]="progressSubmit()">
+                {{ pct }}%
+              </button>
+            }
           </div>
-        }
+          <div class="progress-bar-track" style="width:100%;margin-top:10px;height:8px">
+            <div class="progress-bar-fill" [style.width.%]="progressForm.completion"></div>
+          </div>
+        </div>
       </div>
 
       <div class="pd-footer">
-        <button class="pd-cancel" (click)="closeExpenseForm()" [disabled]="expenseSubmit()">Cancel</button>
-        <button class="pd-submit" (click)="submitExpense()" [disabled]="expenseSubmit()">
-          @if (expenseSubmit()) { <span class="pd-spin"></span> Recording… }
-          @else { ✓ Record Expense }
+        <button class="pd-cancel" (click)="closeProgressForm()" [disabled]="progressSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitProgress()" [disabled]="progressSubmit()">
+          @if (progressSubmit()) { <span class="pd-spin"></span> Saving… }
+          @else { ✓ Update Progress }
         </button>
       </div>
 
+    </div>
+  </div>
+}
+
+<!-- ── Category Budget History ── -->
+@if (showCategoryHistory()) {
+  <div class="pd-backdrop" (click)="closeCategoryHistory()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">📚</div>
+          <div>
+            <h2 class="pd-title">{{ selectedCategory()?.category }} History</h2>
+            <p class="pd-sub">Expenses recorded against this budget category</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeCategoryHistory()">✕</button>
+      </div>
+      <div class="pd-body">
+        @if (selectedCategory()) {
+          <div class="category-summary-grid">
+            <div><span>Approved</span><strong>${{ selectedCategory()!.allocatedAmount | number:'1.0-0' }}</strong></div>
+            <div><span>Used</span><strong>${{ selectedCategory()!.spentAmount | number:'1.0-0' }}</strong></div>
+            <div><span>Remaining</span><strong>${{ (selectedCategory()!.allocatedAmount - selectedCategory()!.spentAmount) | number:'1.0-0' }}</strong></div>
+          </div>
+        }
+        @if (categoryExpenses().length === 0) {
+          <div class="empty-state" style="padding:24px 0">No expenses recorded for this category.</div>
+        } @else {
+          @for (expense of categoryExpenses(); track expense.id) {
+            <div class="history-row">
+              <div><strong>{{ expense.description }}</strong><span>{{ expense.expenseDate | date:'MMM d, y' }}</span></div>
+              <strong>${{ expense.amount | number:'1.0-2' }}</strong>
+            </div>
+          }
+        }
+      </div>
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeCategoryHistory()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── New Budget Request ── -->
+@if (showRequestModal()) {
+  <div class="pd-backdrop" (click)="closeBudgetRequestModal()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">💰</div>
+          <div>
+            <h2 class="pd-title">Request Additional Budget</h2>
+            <p class="pd-sub">The organization admin must approve this request</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeBudgetRequestModal()" [disabled]="requestSubmit()">✕</button>
+      </div>
+      @if (requestError()) { <div class="pd-alert error">⚠ {{ requestError() }}</div> }
+      @if (requestSuccess()) { <div class="pd-alert success">✓ {{ requestSuccess() }}</div> }
+      <div class="pd-body">
+        <div class="pd-field">
+          <label for="request-category">Budget Category</label>
+          <select id="request-category" [(ngModel)]="requestForm.category" (ngModelChange)="onCategoryChangeInRequest()" [disabled]="requestSubmit()">
+            @for (entry of budgetCategories(); track entry.category) {
+              <option [ngValue]="entry.category">{{ entry.category }}</option>
+            }
+          </select>
+        </div>
+        <div class="category-summary-grid">
+          <div><span>Current Budget</span><strong>${{ requestForm.currentBudget | number:'1.0-0' }}</strong></div>
+          <div><span>Status</span><strong>Pending approval</strong></div>
+        </div>
+        <div class="pd-field">
+          <label for="request-amount">Requested Amount <span class="req">*</span></label>
+          <input id="request-amount" type="number" min="1" step="1" [(ngModel)]="requestForm.requestedAmount" placeholder="e.g. 50000" [disabled]="requestSubmit()" />
+        </div>
+        <div class="pd-field">
+          <label for="request-reason">Reason <span class="req">*</span></label>
+          <textarea id="request-reason" rows="3" [(ngModel)]="requestForm.reason" placeholder="Explain why this additional budget is needed" [disabled]="requestSubmit()"></textarea>
+        </div>
+      </div>
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeBudgetRequestModal()" [disabled]="requestSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitBudgetRequest()" [disabled]="requestSubmit()">
+          @if (requestSubmit()) { <span class="pd-spin"></span> Sending… } @else { Submit Request }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Review Budget Request ── -->
+@if (showReviewModal() && reviewTarget()) {
+  <div class="pd-backdrop" (click)="closeReviewModal()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon" [style.background]="reviewForm.approve ? '#dcfce7' : '#fee2e2'">{{ reviewForm.approve ? '✓' : '!' }}</div>
+          <div>
+            <h2 class="pd-title">{{ reviewForm.approve ? 'Approve' : 'Decline' }} Budget Request</h2>
+            <p class="pd-sub">{{ reviewTarget()!.category }} · ${{ reviewTarget()!.requestedAmount | number:'1.0-0' }}</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeReviewModal()" [disabled]="reviewSubmit()">✕</button>
+      </div>
+      @if (reviewError()) { <div class="pd-alert error">⚠ {{ reviewError() }}</div> }
+      <div class="pd-body">
+        <div class="request-review-detail"><span>Project manager</span><strong>{{ reviewTarget()!.projectManagerName ?? 'Project Manager' }}</strong></div>
+        <div class="request-review-detail"><span>Reason</span><strong>{{ reviewTarget()!.reason }}</strong></div>
+        <div class="pd-field">
+          <label for="review-comment">Comment (optional)</label>
+          <textarea id="review-comment" rows="3" [(ngModel)]="reviewForm.comment" placeholder="Add a note for the project manager" [disabled]="reviewSubmit()"></textarea>
+        </div>
+      </div>
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeReviewModal()" [disabled]="reviewSubmit()">Cancel</button>
+        <button class="pd-submit" [class.danger]="!reviewForm.approve" (click)="submitReview()" [disabled]="reviewSubmit()">
+          @if (reviewSubmit()) { <span class="pd-spin"></span> Saving… } @else { {{ reviewForm.approve ? 'Approve Request' : 'Decline Request' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Add Project Team Member ── -->
+@if (showAddMemberModal()) {
+  <div class="pd-backdrop" (click)="closeAddMemberModal()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">👥</div>
+          <div>
+            <h2 class="pd-title">Add Team Member</h2>
+            <p class="pd-sub">Add project information without creating an organization account</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeAddMemberModal()" [disabled]="addMemberSubmit()">✕</button>
+      </div>
+      @if (addMemberError()) { <div class="pd-alert error">⚠ {{ addMemberError() }}</div> }
+      @if (addMemberSuccess()) { <div class="pd-alert success">✓ {{ addMemberSuccess() }}</div> }
+      <div class="pd-body">
+        <div class="pd-row">
+          <div class="pd-field"><label for="member-first-name">First Name <span class="req">*</span></label><input id="member-first-name" [(ngModel)]="addMemberForm.firstName" [disabled]="addMemberSubmit()" /></div>
+          <div class="pd-field"><label for="member-last-name">Last Name <span class="req">*</span></label><input id="member-last-name" [(ngModel)]="addMemberForm.lastName" [disabled]="addMemberSubmit()" /></div>
+        </div>
+        <div class="pd-field"><label for="member-email">Email <span class="req">*</span></label><input id="member-email" type="email" [(ngModel)]="addMemberForm.email" [disabled]="addMemberSubmit()" /></div>
+        <div class="pd-field"><label for="member-phone">Phone</label><input id="member-phone" type="tel" [(ngModel)]="addMemberForm.phone" [disabled]="addMemberSubmit()" /></div>
+        <div class="pd-field">
+          <label for="member-project-role">Role in Project <span class="req">*</span></label>
+          <input id="member-project-role" [(ngModel)]="addMemberForm.projectRole"
+                 placeholder="e.g. Backend Developer" [disabled]="addMemberSubmit()" />
+        </div>
+      </div>
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeAddMemberModal()" [disabled]="addMemberSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitAddMember()" [disabled]="addMemberSubmit()">
+          @if (addMemberSubmit()) { <span class="pd-spin"></span> Adding… } @else { Add Team Member }
+        </button>
+      </div>
     </div>
   </div>
 }

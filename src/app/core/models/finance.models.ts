@@ -67,3 +67,36 @@ export interface ExpenseFilterParams {
   from?: string;
   to?: string;
 }
+
+export interface BudgetRequest {
+  id: number;
+  organizationId: number;
+  projectId: number;
+  projectName: string;
+  projectManagerId?: number;
+  projectManagerName?: string;
+  budgetLineId?: number;
+  category: string;
+  currentBudget: number;
+  requestedAmount: number;
+  reason: string;
+  status: 'Pending' | 'Approved' | 'Declined' | number;
+  reviewedBy?: number;
+  reviewedByName?: string;
+  reviewedAt?: string;
+  reviewComment?: string;
+  createdAt: string;
+}
+
+export interface CreateBudgetRequestPayload {
+  projectId: number;
+  budgetLineId?: number;
+  category: string;
+  requestedAmount: number;
+  reason: string;
+}
+
+export interface ReviewBudgetRequestPayload {
+  approve: boolean;
+  reviewComment?: string;
+}

@@ -31,6 +31,7 @@
 .np-backdrop {
   position: fixed; inset: 0;
   background: rgba(15, 23, 42, 0.48);
+  -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   z-index: 1000;
   display: flex; align-items: center; justify-content: center;
@@ -178,3 +179,26 @@
 }
 
 @keyframes np-spin { to { transform: rotate(360deg); } }
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.btn-danger-outline {
+  background: #fff; color: var(--danger, #ef4444);
+  border: 1px solid var(--danger-light, #fecaca);
+  font-weight: 600; cursor: pointer; border-radius: 6px; padding: 4px 10px;
+  font-size: 12px; display: inline-flex; align-items: center; gap: 4px;
+  transition: var(--transition);
+  &:hover:not(:disabled) { background: var(--danger-light, #fee2e2); border-color: var(--danger, #ef4444); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.np-submit.danger {
+  background: #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  &:hover:not(:disabled) { background: #b91c1c; }
+}
