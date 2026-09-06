@@ -1,0 +1,257 @@
+<div class="page animate-in">
+  @if (loading()) {
+    <div class="loading-state"><div class="spinner"></div>Loading project…</div>
+  }
+
+  @if (project()) {
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <a routerLink="/projects" class="back-btn">← Projects</a>
+        <div class="page-title" style="margin-top:8px">
+          <div class="proj-icon-lg">{{ project()!.name[0].toUpperCase() }}</div>
+          {{ project()!.name }}
+        </div>
+        @if (project()!.description) {
+          <div class="page-subtitle" style="margin-top:4px">{{ project()!.description }}</div>
+        }
+      </div>
+      <div class="header-actions">
+        <span class="badge" [ngClass]="statusClass(project()!.status)" style="font-size:13px;padding:6px 14px">
+          {{ statusLabel(project()!.status) }}
+        </span>
+        @if (canManageProject) {
+          <button class="btn-secondary btn-sm" (click)="openUpdateForm()">✏️ Update Project</button>
+          <button class="btn-outline btn-sm"   (click)="openExpenseForm()">💸 Record Expense</button>
+        }
+      </div>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="stat-strip">
+      <div class="stat-box">
+        <div class="stat-box-label">Progress</div>
+        <div class="stat-box-val">{{ project()!.progressPercentage }}%</div>
+        <div class="progress-bar-track" style="width:100%;margin-top:6px">
+          <div class="progress-bar-fill" [style.width.%]="project()!.progressPercentage"></div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">Manager</div>
+        <div class="stat-box-val">{{ project()!.projectManagerName ?? '—' }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">Start Date</div>
+        <div class="stat-box-val">{{ project()!.startDate | date:'MMM d, y' }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">End Date</div>
+        <div class="stat-box-val">
+          {{ project()!.endDate ? (project()!.endDate! | date:'MMM d, y') : 'Open-ended' }}
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">Members</div>
+        <div class="stat-box-val">{{ project()!.members.length }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">Tasks</div>
+        <div class="stat-box-val">{{ tasks()?.totalCount ?? '…' }}</div>
+      </div>
+    </div>
+
+    <!-- Two-column detail -->
+    <div class="detail-grid">
+
+      <!-- Team Members -->
+      <div class="card detail-card">
+        <div class="detail-card-header">👥 Team Members</div>
+        <div class="detail-card-body">
+          @if (project()!.members.length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">👤</div>
+              <div class="empty-title">No members yet</div>
+            </div>
+          }
+          @for (m of project()!.members; track m.userId) {
+            <div class="member-row">
+              <div class="avatar">{{ m.fullName[0] }}</div>
+              <div class="member-info">
+                <div class="member-name">{{ m.fullName }}</div>
+                <div class="member-role-tag">{{ m.projectRole }}</div>
+              </div>
+              <div class="member-email">{{ m.email }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Recent Tasks -->
+      <div class="card detail-card">
+        <div class="detail-card-header">✅ Recent Tasks</div>
+        <div class="detail-card-body">
+          @if (!tasks() || tasks()!.items.length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">No tasks yet</div>
+            </div>
+          }
+          @for (t of tasks()?.items; track t.id) {
+            <div class="task-row">
+              <div class="task-status-dot" [ngClass]="taskStatusDot(t.status)"></div>
+              <div class="task-info">
+                <div class="task-title-sm">{{ t.title }}</div>
+                <div class="task-meta-row">
+                  <span class="badge {{ priorityClass(t.priority) }}" style="font-size:10px;padding:1px 7px">
+                    {{ priorityLabel(t.priority) }}
+                  </span>
+                  <span class="task-status-label">{{ taskStatusLabel(t.status) }}</span>
+                  @if (t.assignedToUserName) {
+                    <span class="task-assignee">· {{ t.assignedToUserName }}</span>
+                  }
+                </div>
+              </div>
+              @if (t.dueDate) {
+                <div class="task-due" [class.overdue]="isOverdue(t)">
+                  {{ t.dueDate | date:'MMM d' }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+<!-- ── Update Project Modal ── -->
+@if (showUpdateForm()) {
+  <div class="pd-backdrop" (click)="closeUpdateForm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">✏️</div>
+          <div>
+            <h2 class="pd-title">Update Project</h2>
+            <p class="pd-sub">Update status, progress, and end date</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeUpdateForm()" [disabled]="updateSubmit()">✕</button>
+      </div>
+
+      @if (updateError()) {
+        <div class="pd-alert error">⚠ {{ updateError() }}</div>
+      }
+      @if (updateSuccess()) {
+        <div class="pd-alert success">✓ {{ updateSuccess() }}</div>
+      }
+
+      <div class="pd-body">
+        <div class="pd-field">
+          <label>Status</label>
+          <select [(ngModel)]="updateForm.status" [disabled]="updateSubmit()">
+            @for (s of projectStatuses; track s.value) {
+              <option [ngValue]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="pd-field">
+          <label>Progress (0–100 %)</label>
+          <input type="number" [(ngModel)]="updateForm.progressPercentage"
+                 min="0" max="100" placeholder="0" [disabled]="updateSubmit()" />
+        </div>
+
+        <div class="pd-field">
+          <label>End Date</label>
+          <input type="date" [(ngModel)]="updateForm.endDate" [disabled]="updateSubmit()" />
+        </div>
+
+        <div class="pd-field">
+          <label>Description</label>
+          <textarea [(ngModel)]="updateForm.description" rows="2"
+                    placeholder="Project description…" [disabled]="updateSubmit()"></textarea>
+        </div>
+      </div>
+
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeUpdateForm()" [disabled]="updateSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitUpdate()" [disabled]="updateSubmit()">
+          @if (updateSubmit()) { <span class="pd-spin"></span> Saving… }
+          @else { ✓ Save Changes }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── Record Expense Modal ── -->
+@if (showExpenseForm()) {
+  <div class="pd-backdrop" (click)="closeExpenseForm()">
+    <div class="pd-modal" (click)="$event.stopPropagation()">
+
+      <div class="pd-header">
+        <div class="pd-header-left">
+          <div class="pd-icon">💸</div>
+          <div>
+            <h2 class="pd-title">Record Expense</h2>
+            <p class="pd-sub">Log a project expense</p>
+          </div>
+        </div>
+        <button class="pd-close" (click)="closeExpenseForm()" [disabled]="expenseSubmit()">✕</button>
+      </div>
+
+      @if (expenseError()) {
+        <div class="pd-alert error">⚠ {{ expenseError() }}</div>
+      }
+      @if (expenseSuccess()) {
+        <div class="pd-alert success">✓ {{ expenseSuccess() }}</div>
+      }
+
+      <div class="pd-body">
+        <div class="pd-row">
+          <div class="pd-field">
+            <label>Amount <span class="req">*</span></label>
+            <input type="number" [(ngModel)]="expenseForm.amount" min="0.01" step="0.01"
+                   placeholder="0.00" [disabled]="expenseSubmit()" />
+          </div>
+          <div class="pd-field">
+            <label>Date <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="expenseForm.expenseDate" [disabled]="expenseSubmit()" />
+          </div>
+        </div>
+
+        <div class="pd-field">
+          <label>Description <span class="req">*</span></label>
+          <input [(ngModel)]="expenseForm.description" placeholder="What was this expense for?" [disabled]="expenseSubmit()" />
+        </div>
+
+        @if (budgets().length > 0) {
+          <div class="pd-field">
+            <label>Budget Line</label>
+            <select [(ngModel)]="expenseForm.budgetLineId" [disabled]="expenseSubmit()">
+              <option [ngValue]="null">— None —</option>
+              @for (b of budgets(); track b.id) {
+                @for (line of b.budgetLines; track line.id) {
+                  <option [ngValue]="line.id">{{ line.category }} (${{ line.allocatedAmount | number:'1.0-0' }} allocated)</option>
+                }
+              }
+            </select>
+          </div>
+        }
+      </div>
+
+      <div class="pd-footer">
+        <button class="pd-cancel" (click)="closeExpenseForm()" [disabled]="expenseSubmit()">Cancel</button>
+        <button class="pd-submit" (click)="submitExpense()" [disabled]="expenseSubmit()">
+          @if (expenseSubmit()) { <span class="pd-spin"></span> Recording… }
+          @else { ✓ Record Expense }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

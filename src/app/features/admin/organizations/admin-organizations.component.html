@@ -1,0 +1,235 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Organizations</h1>
+      <p class="page-sub">All registered tenants on the platform</p>
+    </div>
+    <div class="header-actions">
+      <span class="count-chip">{{ filtered().length }} organizations</span>
+      <button class="btn-register" (click)="openModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Register Organization
+      </button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input class="search-inp" [(ngModel)]="search" (ngModelChange)="applyFilter()" placeholder="🔍  Search by name or email…" />
+    <select class="filter-sel" [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
+      <option value="">All Status</option>
+      <option value="active">Active</option>
+      <option value="suspended">Suspended</option>
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><span>Loading…</span></div>
+  } @else {
+    <div class="table-card">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Organization</th>
+            <th>Status</th>
+            <th>Users</th>
+            <th>Projects</th>
+            <th>Tasks</th>
+            <th>Budget</th>
+            <th>Expenses</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (org of filtered(); track org.id) {
+            <tr>
+              <td>
+                <div class="org-cell">
+                  <div class="org-av">{{ org.name[0].toUpperCase() }}</div>
+                  <div>
+                    <div class="org-name">{{ org.name }}</div>
+                    <div class="org-email">{{ org.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" [class.active]="org.isActive" [class.suspended]="!org.isActive">
+                  ● {{ org.isActive ? 'Active' : 'Suspended' }}
+                </span>
+              </td>
+              <td class="num">{{ org.totalUsers }}</td>
+              <td class="num">{{ org.totalProjects }}</td>
+              <td class="num">{{ org.totalTasks }}</td>
+              <td class="money">${{ org.totalBudget   | number:'1.0-0' }}</td>
+              <td class="money">${{ org.totalExpenses | number:'1.0-0' }}</td>
+              <td class="date">{{ org.createdAt | date:'MMM d, y' }}</td>
+              <td>
+                @if (org.isActive) {
+                  <button class="btn-action danger" (click)="suspend(org.id)" [disabled]="actionId() === org.id">
+                    {{ actionId() === org.id ? '…' : 'Suspend' }}
+                  </button>
+                } @else {
+                  <button class="btn-action success" (click)="activate(org.id)" [disabled]="actionId() === org.id">
+                    {{ actionId() === org.id ? '…' : 'Activate' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr><td colspan="9" class="empty-cell">No organizations found.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ── Register Organization Modal ── -->
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Register Organization</h2>
+            <p class="modal-sub">Create a new tenant and admin account</p>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeModal()" [disabled]="submitting()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Alerts -->
+      @if (formError()) {
+        <div class="modal-alert error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ formError() }}
+        </div>
+      }
+      @if (formSuccess()) {
+        <div class="modal-alert success">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+          {{ formSuccess() }}
+        </div>
+      }
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Section: Organization -->
+        <p class="section-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          Organization Details
+        </p>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Name <span class="req">*</span></label>
+            <input [(ngModel)]="form.name" placeholder="Shaka Analytics" [disabled]="submitting()" />
+          </div>
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" [(ngModel)]="form.email" placeholder="contact@shaka.com" [disabled]="submitting()" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Phone</label>
+            <input [(ngModel)]="form.phone" placeholder="+251 900 00 00 00" [disabled]="submitting()" />
+          </div>
+          <div class="field">
+            <label>Time Zone</label>
+            <select [(ngModel)]="form.timeZone" [disabled]="submitting()">
+              <option value="UTC">UTC</option>
+              <option value="Africa/Nairobi">Africa / Nairobi</option>
+              <option value="Africa/Addis_Ababa">Africa / Addis Ababa</option>
+              <option value="America/New_York">America / New York</option>
+              <option value="America/Los_Angeles">America / Los Angeles</option>
+              <option value="Europe/London">Europe / London</option>
+              <option value="Europe/Paris">Europe / Paris</option>
+              
+              
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Address</label>
+          <input [(ngModel)]="form.address" placeholder="Bole Addis Ababa, Ethiopia" [disabled]="submitting()" />
+        </div>
+
+        <!-- Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Section: Admin -->
+        <p class="section-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Administrator Account
+        </p>
+
+        <div class="row-2">
+          <div class="field">
+            <label>First Name <span class="req">*</span></label>
+            <input [(ngModel)]="form.adminFirstName" placeholder="Abebe" [disabled]="submitting()" />
+          </div>
+          <div class="field">
+            <label>Last Name <span class="req">*</span></label>
+            <input [(ngModel)]="form.adminLastName" placeholder="Kebede" [disabled]="submitting()" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Admin Email <span class="req">*</span></label>
+            <input type="email" [(ngModel)]="form.adminEmail" placeholder="abebe@gmail.com" [disabled]="submitting()" />
+          </div>
+          <div class="field">
+            <label>Password <span class="req">*</span></label>
+            <input type="password" [(ngModel)]="form.adminPassword" placeholder="Min. 8 characters" [disabled]="submitting()" />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()" [disabled]="submitting()">Cancel</button>
+        <button class="btn-submit" (click)="submitRegister()" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spin"></span> Registering…
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Register
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

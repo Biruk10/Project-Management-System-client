@@ -1,0 +1,313 @@
+﻿<div class="page animate-in">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">👥 Users</div>
+      <div class="page-subtitle">{{ result()?.totalCount ?? 0 }} users in your organization</div>
+    </div>
+    <button class="btn-primary" (click)="openNewUser()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New User
+    </button>
+  </div>
+
+  <div class="filters">
+    <input class="filter-input" type="text" [(ngModel)]="search" (ngModelChange)="onSearch()"
+           placeholder="🔍  Search by name or email…" />
+    <select class="filter-select" [(ngModel)]="activeFilter" (ngModelChange)="onSearch()">
+      <option value="">All Status</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><div class="spinner"></div>Loading users…</div>
+  } @else if (result()?.items?.length === 0) {
+    <div class="card empty-state">
+      <div class="empty-icon">👤</div>
+      <div class="empty-title">No users found</div>
+      <div class="empty-desc">Click <strong>New User</strong> to add the first member.</div>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Roles</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of result()?.items; track user.id) {
+            <tr>
+              <!-- User cell -->
+              <td>
+                <div class="user-cell">
+                  <div class="u-avatar">{{ user.firstName[0].toUpperCase() }}</div>
+                  <div>
+                    <div class="u-name">{{ user.firstName }} {{ user.lastName }}</div>
+                    <div class="u-email">{{ user.email }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Roles + Assign Task button -->
+              <td>
+                <div class="role-cell">
+                  <div class="role-tags">
+                    @for (role of user.roles; track role) {
+                      <span class="role-tag">{{ role }}</span>
+                    }
+                    @if (user.roles.length === 0) {
+                      <span class="no-role">—</span>
+                    }
+                  </div>
+                  <button class="btn-assign" (click)="openAssignTask(user)" title="Assign a task to {{ user.firstName }}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="9 11 12 14 22 4"/>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    Assign Task
+                  </button>
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td>
+                <span class="status-chip" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                  <span class="status-dot"></span>
+                  {{ user.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <td class="td-muted">{{ user.lastLoginAt ? (user.lastLoginAt | date:'MMM d, y') : 'Never' }}</td>
+              <td class="td-muted">{{ user.createdAt | date:'MMM d, y' }}</td>
+
+              <!-- Toggle active -->
+              <td>
+                <button class="btn-toggle"
+                        [class.deactivate]="user.isActive"
+                        [class.activate]="!user.isActive"
+                        (click)="toggle(user)">
+                  {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button [disabled]="page === 1"          (click)="changePage(page - 1)">← Prev</button>
+      <span>Page {{ page }} of {{ result()?.totalPages }}</span>
+      <button [disabled]="!result()?.hasNextPage" (click)="changePage(page + 1)">Next →</button>
+    </div>
+  }
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     New User Modal
+     ════════════════════════════════════════════════════════════ -->
+@if (showNewUser()) {
+  <div class="nu-backdrop" (click)="closeNewUser()">
+    <div class="nu-modal" (click)="$event.stopPropagation()">
+
+      <div class="nu-header">
+        <div class="nu-header-left">
+          <div class="nu-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="nu-title">New User</h2>
+            <p class="nu-sub">Create a user and assign a role</p>
+          </div>
+        </div>
+        <button class="nu-close" (click)="closeNewUser()" [disabled]="submitting()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (formError()) {
+        <div class="nu-alert">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ formError() }}
+        </div>
+      }
+
+      <div class="nu-body">
+        <div class="nu-row">
+          <div class="nu-field">
+            <label>First Name <span class="req">*</span></label>
+            <input [(ngModel)]="newUserForm.firstName" placeholder="Abebe" [disabled]="submitting()" />
+          </div>
+          <div class="nu-field">
+            <label>Last Name <span class="req">*</span></label>
+            <input [(ngModel)]="newUserForm.lastName" placeholder="Kebede" [disabled]="submitting()" />
+          </div>
+        </div>
+        <div class="nu-field">
+          <label>Email Address <span class="req">*</span></label>
+          <input type="email" [(ngModel)]="newUserForm.email" placeholder="abebe@company.com" [disabled]="submitting()" />
+        </div>
+        <div class="nu-field">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" [(ngModel)]="newUserForm.password" placeholder="Min. 8 characters" [disabled]="submitting()" />
+        </div>
+        <div class="nu-field">
+          <label>Role <span class="req">*</span></label>
+          <select [(ngModel)]="newUserForm.roleId" [disabled]="submitting()">
+            <option [ngValue]="null">— Select a role —</option>
+            @for (r of roles(); track r.id) {
+              <option [ngValue]="r.id">{{ r.name }}</option>
+            }
+          </select>
+          <p class="nu-hint">The role determines what the user can see and do in the platform.</p>
+        </div>
+      </div>
+
+      <div class="nu-footer">
+        <button class="nu-cancel" (click)="closeNewUser()" [disabled]="submitting()">Cancel</button>
+        <button class="nu-submit" (click)="submitCreate()" [disabled]="submitting()">
+          @if (submitting()) { <span class="nu-spin"></span> Creating… }
+          @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Create User
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ════════════════════════════════════════════════════════════
+     Assign Task Modal
+     ════════════════════════════════════════════════════════════ -->
+@if (showAssignTask()) {
+  <div class="at-backdrop" (click)="closeAssignTask()">
+    <div class="at-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="at-header">
+        <div class="at-header-left">
+          <div class="at-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="9 11 12 14 22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="at-title">Assign Task</h2>
+            <p class="at-sub">
+              Assigning to
+              <strong>{{ selectedUser()?.firstName }} {{ selectedUser()?.lastName }}</strong>
+            </p>
+          </div>
+        </div>
+        <button class="at-close" (click)="closeAssignTask()" [disabled]="taskSubmitting()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Alerts -->
+      @if (taskError()) {
+        <div class="at-alert error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ taskError() }}
+        </div>
+      }
+      @if (taskSuccess()) {
+        <div class="at-alert success">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+          {{ taskSuccess() }}
+        </div>
+      }
+
+      <!-- Body -->
+      <div class="at-body">
+
+        <div class="at-field">
+          <label>Task Title <span class="req">*</span></label>
+          <input [(ngModel)]="taskForm.title" placeholder="e.g. Design homepage wireframes"
+                 [disabled]="taskSubmitting()" />
+        </div>
+
+        <div class="at-field">
+          <label>Description</label>
+          <textarea [(ngModel)]="taskForm.description" rows="2"
+                    placeholder="What needs to be done…" [disabled]="taskSubmitting()"></textarea>
+        </div>
+
+        <div class="at-row">
+          <div class="at-field">
+            <label>Project <span class="req">*</span></label>
+            <select [(ngModel)]="taskForm.projectId" [disabled]="taskSubmitting()">
+              <option [ngValue]="null">— Select project —</option>
+              @for (p of projects(); track p.id) {
+                <option [ngValue]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="at-field">
+            <label>Priority</label>
+            <select [(ngModel)]="taskForm.priority" [disabled]="taskSubmitting()">
+              @for (pri of priorities; track pri.value) {
+                <option [ngValue]="pri.value">{{ pri.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="at-field">
+          <label>Due Date</label>
+          <input type="date" [(ngModel)]="taskForm.dueDate" [disabled]="taskSubmitting()" />
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="at-footer">
+        <button class="at-cancel" (click)="closeAssignTask()" [disabled]="taskSubmitting()">Cancel</button>
+        <button class="at-submit" (click)="submitAssignTask()" [disabled]="taskSubmitting()">
+          @if (taskSubmitting()) {
+            <span class="at-spin"></span> Assigning…
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Assign Task
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

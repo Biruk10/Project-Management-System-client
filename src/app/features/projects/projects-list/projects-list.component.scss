@@ -1,0 +1,180 @@
+// ── Table cells ─────────────────────────────────────────────────────────────
+
+.proj-cell { display: flex; align-items: center; gap: 10px; }
+.proj-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.proj-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+.proj-desc { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+
+.manager-cell { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-700); }
+.avatar-xs {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--primary-light); color: var(--primary);
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.progress-cell { display: flex; align-items: center; gap: 8px; }
+.prog-label { font-size: 12px; font-weight: 600; color: var(--gray-600); width: 32px; }
+.members-chip { font-size: 12px; color: var(--gray-600); font-weight: 500; }
+
+.timeline-cell { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--gray-500); }
+.arrow { color: var(--gray-300); }
+.text-muted { font-size: 12px; color: var(--gray-400); }
+
+// ── New Project Modal ────────────────────────────────────────────────────────
+
+.np-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  animation: np-bg 0.15s ease;
+}
+
+@keyframes np-bg {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+@keyframes np-in {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.np-modal {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.07);
+  width: 500px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  display: flex; flex-direction: column;
+  animation: np-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+// Header
+.np-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  flex-shrink: 0;
+}
+.np-header-left { display: flex; align-items: center; gap: 12px; }
+.np-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--primary-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary); flex-shrink: 0;
+}
+.np-title { font-size: 15px; font-weight: 800; color: var(--gray-900); margin: 0 0 1px; }
+.np-sub   { font-size: 11.5px; color: var(--gray-400); margin: 0; }
+
+.np-close {
+  background: none; border: none; cursor: pointer; color: var(--gray-400);
+  padding: 6px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); line-height: 0;
+  &:hover:not(:disabled) { background: var(--gray-100); color: var(--gray-700); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// Alert
+.np-alert {
+  display: flex; align-items: center; gap: 8px;
+  margin: 12px 20px 0;
+  padding: 9px 13px;
+  background: var(--danger-light); color: #b91c1c;
+  border-left: 3px solid var(--danger);
+  border-radius: 8px;
+  font-size: 12.5px; font-weight: 500;
+  flex-shrink: 0;
+}
+
+// Body
+.np-body {
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 13px;
+  overflow-y: auto; flex: 1;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+}
+
+.np-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+
+.np-field {
+  display: flex; flex-direction: column; gap: 5px;
+
+  label {
+    font-size: 11.5px; font-weight: 600; color: var(--gray-600);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    .req { color: var(--danger); margin-left: 1px; text-transform: none; }
+  }
+
+  input, select, textarea {
+    width: 100%; box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px; font-family: inherit;
+    color: var(--gray-800); background: #fff;
+    transition: var(--transition);
+    resize: none;
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    &::placeholder { color: var(--gray-300); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; background: var(--gray-50); }
+  }
+
+  select { cursor: pointer; }
+}
+
+// Footer
+.np-footer {
+  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+  padding: 13px 20px 16px;
+  border-top: 1px solid var(--gray-100);
+  flex-shrink: 0;
+}
+
+.np-cancel {
+  padding: 8px 18px;
+  background: #fff; color: var(--gray-600);
+  border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: var(--transition);
+  &:hover:not(:disabled) { border-color: var(--gray-400); color: var(--gray-800); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.np-submit {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 20px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+  &:hover:not(:disabled) { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(99,102,241,0.4); transform: translateY(-1px); }
+  &:active:not(:disabled) { transform: translateY(0); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+}
+
+.np-spin {
+  display: inline-block; width: 13px; height: 13px;
+  border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+  border-radius: 50%; animation: np-spin 0.65s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes np-spin { to { transform: rotate(360deg); } }
